@@ -95,7 +95,6 @@ Le résultat respecte la demande : une liste de règles de gestion et un tableau
 
 ![MCD](MCD_screen.png)
 
-Fichier source du MCD : _[nom du fichier source, à compléter]_
 
 
 ### 2.2 Éléments de modélisation avancée
