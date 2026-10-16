@@ -3,7 +3,7 @@
 **Domaine : café-bibliothèque et espace de travail culturel**
 (inspiré de l'Anticafé, du Book-Shop et d'ICI Librairie)
 
-Groupe : _Alimata Sacko et Lise Sahli_
+Groupe : _Alimata Sacko & Lise Sahli_
 
 L'entreprise fictive propose un espace convivial qui combine restauration légère, prêt de livres, prestations d'impression/reprographie, événements culturels et gestion du personnel.
 
