@@ -1,0 +1,139 @@
+Donne les requêtes d’insertion permettant de remplir la base de données dont le modèle relationnel est le suivant : 
+Abonnement (id_abonnement, categorie, tarif, duree)
+Adherent (id_adherent, nom_adherent, prenom_adherent, mail, tel, #id_abonnement, date_souscription, #id_parrain)
+Consommation (id_conso, prix_unitaire, nom_conso)
+Service (id_service, nom_service, #id_membre_directeur)
+Membre (id_membre, nom_membre, prenom_membre, #id_service)
+Commande (id_commande, date_heure, mode_paiement, #id_adherent, #id_service)
+Contenir (#id_commande, #id_conso, quantite)
+ Clé primaire : (id_commande, id_conso)
+Impression (id_impression, nb_page, format_papier, mode_impression, #id_adherent, #id_service)
+Evenement (id_evenement, type_evenement, capacite_max, date_evenement, tarif_evenement)
+Inscrire (#id_adherent, #id_evenement)
+ Clé primaire : (id_adherent, id_evenement)
+Organiser (#id_evenement, #id_service)
+ clé primaire : (id_evenement, id_service)
+Batiment (id_batiment, nb_etage)
+Departement (id_departement, nom_departement, etage, #id_batiment)
+Ouvrage (id_ouvrage, titre, genre, auteur, date_publication, #id_ouvrage_source)
+Exemplaire (#id_ouvrage, numero_exemplaire, etat, #id_departement)
+ Clé primaire : (id_ouvrage, numero_exemplaire)
+Reserver (#id_adherent, #id_ouvrage, date_reservation, statut)
+ Clé primaire : (id_adherent, id_ouvrage)
+Emprunt (id_emprunt, date_debut, date_fin_prevue, date_retour, #id_service, #id_ouvrage, #numero_exemplaire, #id_adherent), (id_ouvrage, numero_exemplaire) référence Exemplaire
+
+Convention de notation :
+Les clés primaires correspondent aux attributs "id_..." de la table, sauf indication contraire (clé composée précisée sous la table). Les clés étrangères sont identifiées par un # et portent le même nom que la clé primaire qu'elles référencent, sauf pour trois exceptions (associations récursives ou circulaires) :
+  - #id_parrain dans Adherent référence Adherent(id_adherent)
+  - #id_ouvrage_source dans Ouvrage référence Ouvrage(id_ouvrage)
+  - #id_membre_directeur dans Service référence Membre(id_membre)
+Dans Emprunt, (#id_ouvrage, #numero_exemplaire) forme une clé étrangère composée qui référence Exemplaire (id_ouvrage, numero_exemplaire). 
+Il doit y avoir :
+- 4 lignes dans les tables Abonnement et Service
+- 2 lignes dans la table Batiment et 8 lignes dans la table Departement
+- 12 lignes dans la table Membre (3 par service)
+- 15 lignes dans la table Consommation
+- 30 lignes dans la table Ouvrage (dont au moins 5 adaptations, c'est-à-dire des ouvrages ayant un id_ouvrage_source) et 50 lignes dans la table Exemplaire (chaque ouvrage a au moins 1 exemplaire)
+- 40 lignes dans la table Adherent (dont au moins 15 adhérents parrainés)
+- 10 lignes dans la table Evenement, au moins 15 lignes dans Organiser et au moins 60 lignes dans Inscrire
+- 60 lignes dans la table Commande, au moins 120 lignes dans Contenir (chaque commande contient au moins 1 consommation)
+- 40 lignes dans la table Impression
+- 25 lignes dans la table Reserver
+- 60 lignes dans la table Emprunt (dont au moins 15 emprunts en cours, c'est-à-dire avec date_retour NULL)
+Les services sont au nombre de 4, dont voici les caractéristiques :
+- nom_service : Restauration (traite les commandes de consommations)
+- nom_service : Reprographie (réalise les impressions)
+- nom_service : Pret et retour (gère les emprunts)
+- nom_service : Animation culturelle (organise les événements)
+Chaque service a un directeur, qui est un membre appartenant à ce service.
+
+Les abonnements sont au nombre de 4 : Etudiant, Standard, Premium, Senior, avec des tarifs croissants (decimaux a 2 chiffres) et des durees differentes (ex : '1 mois', '6 mois', '12 mois').
+Les batiments sont au nombre de 2. Les départements (ex : Romans, BD et manga, Sciences, Jeunesse, Espace de travail...) sont répartis dans ces batiments, avec un etage inferieur ou egal a nb_etage du batiment.
+Règles de cohérence à respecter :
+- Une commande est traitée par le service Restauration, une impression est réalisée par le service Reprographie, un emprunt est géré par le service Pret et retour.
+- Un parrain doit avoir une date_souscription antérieure à celle de ses filleuls, et un adhérent ne peut pas se parrainer lui-même.
+- Un ouvrage ne peut pas être sa propre source, et l'ouvrage source doit avoir une date_publication antérieure à son adaptation.
+- Le nombre d'inscriptions à un événement ne doit pas dépasser sa capacite_max.
+- Un exemplaire ne peut pas être emprunté deux fois sur des périodes qui se chevauchent.
+- date_souscription, date_heure, date_debut, date_evenement et date_reservation sont comprises entre le 01/01/2025 et le 31/12/2026. date_publication des ouvrages est comprise entre 1900 et 2025.
+- Tous les parrains et filleuls ont un abonnement. Au plus 5 adhérents n'ont pas d'abonnement (id_abonnement et date_souscription NULL).
+- Une commande, une impression, un emprunt, une réservation ou une inscription d'un adhérent abonné a lieu après sa date_souscription.
+- Le service Animation culturelle organise chaque événement. Les services Restauration ou Reprographie peuvent y être associés en plus (c'est ce qui donne au moins 15 lignes dans Organiser).
+- capacite_max est comprise entre 15 et 40 et le nombre d'inscrits ne la dépasse jamais. Les couples (adherent, evenement) sont tous distincts.
+- Dans Contenir, une même consommation n'apparaît qu'une fois par commande. Les couples de Reserver sont tous distincts.
+- Chaque couple (id_ouvrage, numero_exemplaire) d'Emprunt existe dans Exemplaire. Les emprunts en cours ont une date_debut postérieure au 01/09/2026, avec au plus un emprunt en cours par exemplaire. date_fin_prevue est 14 à 28 jours après date_debut.
+- Commence le script par : USE mini_projet_BDD; puis SET NAMES utf8mb4;
+- Les identifiants commencent à 1 et sont consécutifs dans chaque table (numero_exemplaire recommence à 1 pour chaque ouvrage).
+- Un INSERT INTO ... VALUES par table, avec la liste des colonnes écrite explicitement. Pas de CREATE TABLE ni de DROP.
+- Échappe les apostrophes dans les textes (ex : 'L''Etranger').
+- Longueurs maximales : noms, prénoms, auteur, genre, nom_conso, nom_service, nom_departement, type_evenement, categorie : 50 ; mail, titre : 100 ; tel, duree, format_papier, mode_paiement, statut : 20 ; mode_impression, etat : 30.
+- mode_impression vaut 'noir et blanc' ou 'couleur'. etat vaut 'neuf', 'bon', 'usé' ou 'abîmé'.
+Les clés étrangères doivent faire référence aux clés primaires existantes : donne les lignes en commençant par remplir les tables dans lesquelles il n'y a pas de clés étrangères, puis les tables dans lesquelles les clés étrangères font références à des clés primaires des tables déjà remplies. 
+Ordre à suivre :
+1. Abonnement, Consommation, Evenement, Batiment, Service (avec id_membre_directeur = NULL)
+2. Membre, puis un UPDATE sur Service pour renseigner id_membre_directeur
+3. Departement, Ouvrage (les ouvrages sources avant les adaptations), Adherent (les parrains avant les filleuls)
+4. Exemplaire, Commande, Impression, Inscrire, Organiser, Reserver
+5. Contenir, Emprunt
+
+Les données doivent respecter les contraintes de validation suivantes :
+
+USE mini_projet_BDD;
+ALTER TABLE Adherent
+    ADD CONSTRAINT uq_adherent_mail UNIQUE (mail);
+ALTER TABLE Contenir
+    MODIFY quantite INT NOT NULL DEFAULT 1;
+ALTER TABLE Commande
+    MODIFY date_heure DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE Reserver
+    MODIFY statut VARCHAR(20) NOT NULL DEFAULT 'en attente';
+ALTER TABLE Adherent
+    ADD CONSTRAINT ck_adherent_id CHECK (id_adherent > 0);
+ALTER TABLE Adherent
+    ADD CONSTRAINT ck_adherent_nom CHECK (CHAR_LENGTH(TRIM(nom_adherent)) > 0);
+ALTER TABLE Adherent
+    ADD CONSTRAINT ck_adherent_prenom CHECK (CHAR_LENGTH(TRIM(prenom_adherent)) > 0);
+ALTER TABLE Adherent
+    ADD CONSTRAINT ck_adherent_tel
+    CHECK (tel IS NULL OR tel REGEXP '^0[1-9][0-9]{8}$');
+ALTER TABLE Adherent
+    ADD CONSTRAINT ck_adherent_mail
+    CHECK (mail IS NULL OR mail LIKE '%_@_%._%');
+ALTER TABLE Abonnement
+    ADD CONSTRAINT ck_abonnement_tarif CHECK (tarif >= 0);
+ALTER TABLE Consommation
+    ADD CONSTRAINT ck_conso_prix CHECK (prix_unitaire > 0);
+ALTER TABLE Contenir
+    ADD CONSTRAINT ck_contenir_quantite CHECK (quantite > 0);
+ALTER TABLE Impression
+    ADD CONSTRAINT ck_impression_pages CHECK (nb_page > 0);
+ALTER TABLE Evenement
+    ADD CONSTRAINT ck_evenement_capacite CHECK (capacite_max > 0);
+ALTER TABLE Evenement
+    ADD CONSTRAINT ck_evenement_tarif CHECK (tarif_evenement >= 0);
+ALTER TABLE Batiment
+    ADD CONSTRAINT ck_batiment_etages CHECK (nb_etage > 0);
+ALTER TABLE Departement
+    ADD CONSTRAINT ck_departement_etage CHECK (etage >= -1);
+ALTER TABLE Exemplaire
+    ADD CONSTRAINT ck_exemplaire_numero CHECK (numero_exemplaire > 0);
+ALTER TABLE Commande
+    ADD CONSTRAINT ck_commande_paiement
+    CHECK (mode_paiement IN ('carte', 'espèces', 'chèque'));
+ALTER TABLE Impression
+    ADD CONSTRAINT ck_impression_format
+    CHECK (format_papier IN ('A5', 'A4', 'A3'));
+ALTER TABLE Reserver
+    ADD CONSTRAINT ck_reserver_statut
+    CHECK (statut IN ('en attente', 'confirmée', 'annulée'));
+ALTER TABLE Emprunt
+    ADD CONSTRAINT ck_emprunt_dates CHECK (date_fin_prevue >= date_debut);
+ALTER TABLE Emprunt
+    ADD CONSTRAINT ck_emprunt_retour
+    CHECK (date_retour IS NULL OR date_retour >= date_debut);
+
+
+Assure-toi que les noms et prénoms des adhérents et des membres du personnel font référence à des origines variées et sont mixtes (hommes et femmes).
+
+
+Fournis l'ensemble sous la forme d’un script SQL prêt à être exécuté.
