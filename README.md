@@ -1,11 +1,10 @@
 # ProjetDB_SACKO_SAHLI
 
 **Domaine : café-bibliothèque et espace de travail culturel**
-(inspiré de l'Anticafé, du Book-Shop et d'ICI Librairie)
 
 Groupe : _Alimata Sacko & Lise Sahli_
 
-L'entreprise fictive propose un espace convivial qui combine restauration légère, prêt de livres, prestations d'impression/reprographie, événements culturels et gestion du personnel.
+L'entreprise fictive propose un espace convivial qui combine restauration légère, prêt de livres, prestations d'impression/reprographie et événements culturels.
 
 ## Sommaire
 
@@ -17,6 +16,12 @@ L'entreprise fictive propose un espace convivial qui combine restauration légè
    - 2.1 Le MCD
    - 2.2 Éléments de modélisation avancée (associations récursives, entité faible / forte)
    - 2.3 Différences entre le dictionnaire de l'IA et notre MCD (ajouts, modifications, suppressions)
+3. [Étape 3 – MLD et MPD](#3-étape-3--mld-et-mpd)
+   - 3.1 Le MLD
+   
+5. [Étape 5 – Interrogation de la BD](#5-étape-5--interrogation-de-la-bd)
+   - 5.1 Scénario d'utilisation
+   - 5.2 Étude du plan d'exécution
 
 
 
@@ -140,7 +145,7 @@ Données ajoutées, absentes du dictionnaire de l'IA :
 | **Evenement** | type_événement, capacité_max, tarif_événement | Capacité et tarif servent à gérer les inscriptions ; le type remplace le titre |
 | **Ouvrage** | genre | Classement du catalogue |
 | **Réserver** (nouvelle association Adhérent–Ouvrage) | date_reservation, statut | Un adhérent peut réserver un ouvrage ; absent du dictionnaire |
-| **Adapter** (nouvelle association récursive) | – | Voir 3.4 b) |
+| **Adapter** (nouvelle association récursive) | – | Voir 2.2 b) |
 | **Service** (nouvelle entité) + Traiter, Réaliser, Organiser, Gérer, Diriger, Faire partie | id_service, nom_service | Le dictionnaire reliait les opérations à l'employé ; nous avons introduit le service comme pivot (voir ci-dessous) |
 | **Département** (nouvelle entité) + Se trouver | id_département, nom_département, étage | Permet de localiser chaque exemplaire |
 | **Batiment** (nouvelle entité) + Habiter | id_batiment, nb_étage | Un département est situé dans un bâtiment ; nb_étage dépend du bâtiment et non du département (3FN) |
@@ -148,8 +153,8 @@ Données ajoutées, absentes du dictionnaire de l'IA :
 #### b) Ce que nous avons modifié (structure)
 
 - **Vocabulaire** : « membre/abonné » devient **Adhérent**, et « employé » devient **Membre** (personnel).
-- **Parrainage** : l'attribut `id_parrain` devient une association récursive (voir 3.4 a).
-- **Exemplaire** : l'identifiant autonome `id_exemplaire` devient un identifiant relatif `numero_exemplaire`, et l'exemplaire devient une entité faible de l'ouvrage (voir 3.4 c).
+- **Parrainage** : l'attribut `id_parrain` devient une association récursive (voir 2.2 a).
+- **Exemplaire** : l'identifiant autonome `id_exemplaire` devient un identifiant relatif `numero_exemplaire`, et l'exemplaire devient une entité faible de l'ouvrage (voir 2.2 c).
 - **Adhésion** : `date_adhesion` devient `date_souscription`, attribut de l'association Souscrire avec la nouvelle entité Abonnement.
 - **Commandes** : un adhérent passe une commande (Passe, 1,1) qui contient des consommations (Contenir) et qui est traitée par un service (Traiter). Dans le dictionnaire, une commande n'était reliée à rien.
 - **Impressions** : une impression est demandée par un adhérent (Demander) et réalisée par un service (Réaliser).
@@ -169,5 +174,203 @@ Données ajoutées, absentes du dictionnaire de l'IA :
 | `code_barres_exemplaire` | L'exemplaire est identifié par (`id_ouvrage`, `numero_exemplaire`) |
 | `date_acquisition` | Non nécessaire aux règles de gestion retenues pour le MCD |
 
+## 3. Étape 3 – MLD et MPD
+
+### 3.1 Le MLD
+
+Notation : Les **clés étrangères** portent le même nom que la clé primaire qu'elles référencent, sauf pour trois cas :
+
+- `#id_parrain` (table Adherent) référence `Adherent(id_adherent)` ;
+- `#id_ouvrage_source` (table Ouvrage) référence `Ouvrage(id_ouvrage)` ;
+- `#id_membre_directeur` (table Service) référence `Membre(id_membre)`.
+
+MLD :
+
+![MLD](MLD_screen.png)
 
 
+## 5. Étape 5 – Interrogation de la BD
+
+### 5.1 Scénario d'utilisation
+
+**Utilisatrice : la directrice du café-bibliothèque.**
+
+En novembre 2026, elle prépare le bilan de l'année et les décisions pour 2027 : budget d'achat de livres, carte de la restauration, programmation culturelle, suivi des adhérents. Elle n'écrit pas de SQL elle-même : ces requêtes sont celles qu'un analyste lui fournit pour répondre à ses questions.
+
+Ses besoins regroupés par thème :
+
+| Besoin de la directrice | Données à extraire 
+|---|---
+| **Gérer le catalogue** : quels rayons renforcer, quels exemplaires retirer ? | Ouvrages par genre, genres les plus empruntés, exemplaires jamais empruntés, adaptations et œuvres d'origine, exemplaires par département 
+| **Suivre les prêts** : qui doit rendre quoi ? | Emprunts en cours et en retard avec emprunteur et titre, adhérents ayant déjà rendu en retard 
+| **Piloter la restauration** : que vend-on, à qui, combien ? | Prix de la carte, chiffre d'affaires par mode de paiement, meilleurs clients, commandes au-dessus de la moyenne, adhérents qui ne commandent jamais 
+| **Programmer des événements** : lesquels fonctionnent ? | Événements à venir, taux de remplissage, services organisateurs et directeurs 
+| **Connaître et fidéliser les adhérents** | Répartition par abonnement, parrainages, fiches incomplètes, adhérents étudiants (@efrei.net), réservations confirmées 
+| **Suivre la reprographie** | Volume de pages par mode et format d'impression 
+
+
+### 5.2 Étude du plan d'exécution
+
+
+*Quels sont les ouvrages de science-fiction actuellement empruntés, et par qui ?*
+
+```sql
+SELECT o.titre, a.nom_adherent, a.prenom_adherent
+FROM Emprunt e
+JOIN Ouvrage o  ON o.id_ouvrage = e.id_ouvrage
+JOIN Adherent a ON a.id_adherent = e.id_adherent
+WHERE o.genre = 'Science-fiction'
+  AND e.date_retour IS NULL;
+```
+
+Résultat : 2 lignes (« 1984 » emprunté par Paul Lambert, « Fondation » emprunté par Thomas Moreau).
+
+Cette requête utilise **trois opérateurs différents** de l'algèbre relationnelle : la sélection σ, la jointure ⋈ (deux fois) et la projection π.
+
+Expression algébrique :
+
+π titre, nom_adherent, prenom_adherent ( σ genre='Science-fiction' ∧ date_retour IS NULL ( (Emprunt ⋈ Ouvrage) ⋈ Adherent ) )
+
+#### Tailles des relations (mesurées sur la base)
+
+| Relation | Lignes |
+|---|---|
+| Emprunt | 60 |
+| Ouvrage | 30 |
+| Adherent | 40 |
+| σ date_retour IS NULL (Emprunt) | 15 |
+| σ genre='Science-fiction' (Ouvrage) | 6 |
+
+
+
+#### Plan 1 : jointures d'abord, sélection ensuite
+
+Notations : E = Emprunt, O = Ouvrage, A = Adherent.
+
+```
+π titre, nom_adherent, prenom_adherent (
+  σ genre = 'Science-fiction' ∧ date_retour IS NULL (
+    ( E ⋈ E.id_ouvrage = O.id_ouvrage  O )
+      ⋈ E.id_adherent = A.id_adherent  A
+  )
+)
+```
+
+```mermaid
+flowchart BT
+  E["Emprunt<br/>60 lignes"]
+  O["Ouvrage<br/>30 lignes"]
+  A["Adherent<br/>40 lignes"]
+  J1["⋈ Emprunt.id_ouvrage = Ouvrage.id_ouvrage<br/>60 lignes"]
+  J2["⋈ Emprunt.id_adherent = Adherent.id_adherent<br/>60 lignes"]
+  S["σ genre = 'Science-fiction' ∧ date_retour IS NULL<br/>2 lignes"]
+  P["π titre, nom_adherent, prenom_adherent<br/>2 lignes"]
+  E --> J1
+  O --> J1
+  J1 --> J2
+  A --> J2
+  J2 --> S
+  S --> P
+```
+
+| Étape | Calcul | Instructions | Lignes obtenues |
+|---|---|---|---|
+| Emprunt ⋈ Ouvrage | 60 × 30 | 1 800 | 60 |
+| (…) ⋈ Adherent | 60 × 40 | 2 400 | 60 |
+| σ genre ∧ date_retour | 60 | 60 | 2 |
+| π | 2 | 2 | 2 |
+| **Total** | | **4 262** | |
+
+#### Plan 2 : sélections poussées vers les feuilles 
+
+```
+π titre, nom_adherent, prenom_adherent (
+  (
+    ( σ date_retour IS NULL (E) )
+      ⋈ E.id_ouvrage = O.id_ouvrage
+    ( σ genre = 'Science-fiction' (O) )
+  )
+    ⋈ E.id_adherent = A.id_adherent  A
+)
+```
+
+```mermaid
+flowchart BT
+  E["Emprunt<br/>60 lignes"]
+  O["Ouvrage<br/>30 lignes"]
+  A["Adherent<br/>40 lignes"]
+  S1["σ date_retour IS NULL<br/>15 lignes"]
+  S2["σ genre = 'Science-fiction'<br/>6 lignes"]
+  J1["⋈ Emprunt.id_ouvrage = Ouvrage.id_ouvrage<br/>2 lignes"]
+  J2["⋈ Emprunt.id_adherent = Adherent.id_adherent<br/>2 lignes"]
+  P["π titre, nom_adherent, prenom_adherent<br/>2 lignes"]
+  E --> S1
+  O --> S2
+  S1 --> J1
+  S2 --> J1
+  J1 --> J2
+  A --> J2
+  J2 --> P
+```
+
+| Étape | Calcul | Instructions | Lignes obtenues |
+|---|---|---|---|
+| σ date_retour IS NULL (Emprunt) | 60 | 60 | 15 |
+| σ genre (Ouvrage) | 30 | 30 | 6 |
+| σ(Emprunt) ⋈ σ(Ouvrage) | 15 × 6 | 90 | 2 |
+| (…) ⋈ Adherent | 2 × 40 | 80 | 2 |
+| π | 2 | 2 | 2 |
+| **Total** | | **262** | |
+
+#### Plan 3 : sélections poussées, mais mauvais ordre de jointure
+
+On sélectionne d'abord, mais on joint Emprunt avec Adherent avant Ouvrage.
+
+```
+π titre, nom_adherent, prenom_adherent (
+  (
+    ( σ date_retour IS NULL (E) )
+      ⋈ E.id_adherent = A.id_adherent  A
+  )
+    ⋈ E.id_ouvrage = O.id_ouvrage
+  ( σ genre = 'Science-fiction' (O) )
+)
+```
+
+```mermaid
+flowchart BT
+  E["Emprunt<br/>60 lignes"]
+  O["Ouvrage<br/>30 lignes"]
+  A["Adherent<br/>40 lignes"]
+  S1["σ date_retour IS NULL<br/>15 lignes"]
+  S2["σ genre = 'Science-fiction'<br/>6 lignes"]
+  J1["⋈ Emprunt.id_adherent = Adherent.id_adherent<br/>15 lignes"]
+  J2["⋈ Emprunt.id_ouvrage = Ouvrage.id_ouvrage<br/>2 lignes"]
+  P["π titre, nom_adherent, prenom_adherent<br/>2 lignes"]
+  E --> S1
+  O --> S2
+  S1 --> J1
+  A --> J1
+  J1 --> J2
+  S2 --> J2
+  J2 --> P
+```
+
+| Étape | Calcul | Instructions | Lignes obtenues |
+|---|---|---|---|
+| σ date_retour IS NULL (Emprunt) | 60 | 60 | 15 |
+| σ genre (Ouvrage) | 30 | 30 | 6 |
+| σ(Emprunt) ⋈ Adherent | 15 × 40 | 600 | 15 |
+| (…) ⋈ σ(Ouvrage) | 15 × 6 | 90 | 2 |
+| π | 2 | 2 | 2 |
+| **Total** | | **782** | |
+
+#### Conclusion
+
+| Plan | Instructions |
+|---|---|
+| Plan 1 (jointures puis sélection) | 4 262 |
+| Plan 3 (sélections, mauvais ordre de jointure) | 782 |
+| **Plan 2 (sélections, bon ordre de jointure)** | **262** |
+
+Le plan 2 est le meilleur.
