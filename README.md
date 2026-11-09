@@ -222,11 +222,11 @@ WHERE o.genre = 'Science-fiction'
   AND e.date_retour IS NULL;
 ```
 
-Résultat : 2 lignes (« 1984 » emprunté par Paul Lambert, « Fondation » emprunté par Thomas Moreau).
+Résultat: 2 lignes (« 1984 » emprunté par Paul Lambert, « Fondation » emprunté par Thomas Moreau).
 
 Cette requête utilise **trois opérateurs différents** de l'algèbre relationnelle : la sélection σ, la jointure ⋈ (deux fois) et la projection π.
 
-Expression algébrique :
+Expression algébrique:
 
 π titre, nom_adherent, prenom_adherent ( σ genre='Science-fiction' ∧ date_retour IS NULL ( (Emprunt ⋈ Ouvrage) ⋈ Adherent ) )
 
@@ -242,9 +242,9 @@ Expression algébrique :
 
 
 
-#### Plan 1 : jointures d'abord, sélection ensuite
+#### Plan 1: jointures d'abord, sélection ensuite
 
-Notations : E = Emprunt, O = Ouvrage, A = Adherent.
+Notations: E = Emprunt, O = Ouvrage, A = Adherent.
 
 ```
 π titre, nom_adherent, prenom_adherent (
@@ -280,7 +280,7 @@ flowchart BT
 | π | 2 | 2 | 2 |
 | **Total** | | **4 262** | |
 
-#### Plan 2 : sélections poussées vers les feuilles 
+#### Plan 2: sélections poussées vers les feuilles 
 
 ```
 π titre, nom_adherent, prenom_adherent (
@@ -321,7 +321,7 @@ flowchart BT
 | π | 2 | 2 | 2 |
 | **Total** | | **262** | |
 
-#### Plan 3 : sélections poussées, mais mauvais ordre de jointure
+#### Plan 3: sélections poussées, mais mauvais ordre de jointure
 
 On sélectionne d'abord, mais on joint Emprunt avec Adherent avant Ouvrage.
 
