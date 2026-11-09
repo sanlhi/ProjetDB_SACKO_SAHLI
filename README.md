@@ -183,9 +183,10 @@ Notation : Les **clés étrangères** portent le même nom que la clé primaire 
 - `#id_membre_directeur` (table Service) référence `Membre(id_membre)`.
 
 MLD :
-
-![MLD](MLD_screen.png)
-
+Erroné:
+![MLD](MLD_screen.png) 
+Corrigé:
+![MLD](MLD_NEW.png)
 
 ## 5. Étape 5 – Interrogation de la BD
 
