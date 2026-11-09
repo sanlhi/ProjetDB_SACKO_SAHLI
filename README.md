@@ -2,7 +2,7 @@
 
 **Domaine : café-bibliothèque et espace de travail culturel**
 
-Groupe : _Alimata Sacko & Lise Sahli_
+Groupe : _Alimata Sacko et Lise Sahli_
 
 L'entreprise fictive propose un espace convivial qui combine restauration légère, prêt de livres, prestations d'impression/reprographie et événements culturels.
 
@@ -35,7 +35,7 @@ Tu travailles dans le domaine du café-bibliothèque et de l'espace de travail c
 
 Ton entreprise veut appliquer MERISE pour concevoir un système d'information. Tu es chargé de la partie analyse, c'est-à-dire de collecter les besoins auprès de l'entreprise. Elle a fait appel à un étudiant en ingénierie informatique pour réaliser ce projet, tu dois lui fournir les informations nécessaires pour qu'il applique ensuite lui-même les étapes suivantes de conception et développement de la base de données.
 
-D'abord, établis les règles de gestion des données de ton entreprise, sous la forme d'une liste à puces. Elles doivent inclure :
+D'abord, établis les règles de gestion des données de ton entreprise, sous la forme d'une liste à puces. Elles doivent inclure:
 
 - Le parrainage entre membres (un membre peut en parrainer d'autres).
 - L'identification des exemplaires physiques rattachés à un ouvrage/livre générique.
@@ -99,8 +99,6 @@ Le résultat respecte la demande : une liste de règles de gestion et un tableau
 ### 2.1 Le MCD
 
 ![MCD](MCD_screen.png)
-
-
 
 ### 2.2 Éléments de modélisation avancée
 
